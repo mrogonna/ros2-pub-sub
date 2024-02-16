@@ -9,6 +9,11 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(example_interfaces REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(image_transport REQUIRED)
+find_package(OpenCV REQUIRED)
 
 add_executable(cpp_node src/my_first_node.cpp)
 ament_target_dependencies(cpp_node rclcpp)
@@ -28,6 +33,16 @@ ament_target_dependencies(number_counter rclcpp example_interfaces)
 add_executable(my_cpp_pkg_node src/my_cpp_pkg_node.cpp)
 ament_target_dependencies(my_cpp_pkg_node rclcpp example_interfaces)
 
+add_executable(usb_cam_pub src/usb_cam_pub.cpp)
+ament_target_dependencies(usb_cam_pub cv_bridge sensor_msgs std_msgs rclcpp image_transport)
+target_link_libraries(usb_cam_pub ${OpenCV_LIBS})
+
+add_executable(usb_cam_sub src/usb_cam_sub.cpp)
+ament_target_dependencies(usb_cam_sub cv_bridge sensor_msgs std_msgs rclcpp image_transport)
+target_link_libraries(usb_cam_sub ${OpenCV_LIBS})
+
+
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 
 
@@ -38,6 +53,8 @@ install(TARGETS
   number_publisher
   number_counter
   my_cpp_pkg_node
+  usb_cam_pub
+  usb_cam_sub
   DESTINATION lib/${PROJECT_NAME}
 )
 
