@@ -33,7 +33,20 @@ MinimalPublisher() : Node("minimal_publisher"), count_(0) ,cap(0){
     auto qos_profile = rclcpp::QoS(rclcpp::KeepLast(10));
     publisher_ = this->create_publisher<sensor_msgs::msg::Image>("topic", qos_profile);
     timer_ = this->create_wall_timer(10ms, std::bind(&MinimalPublisher::timer_callback, this));
-    cv::VideoCapture cap(0, cv::CAP_V4L);
+     //Specify GStreamer pipeline
+    for (int i = 0; i < 10; ++i) {
+      cv::VideoCapture cap(i, cv::CAP_V4L);
+         if (cap.isOpened()) {
+          std::cout << "Camera found at index: " << i << std::endl;
+          cap.release();
+        }
+      }
+        // Check if the camera is opened successfully
+        if (!cap.isOpened()) {
+            RCLCPP_ERROR(this->get_logger(), "Failed to open camera");
+        } 
+
+
 }
 
 private:
@@ -42,10 +55,11 @@ void timer_callback() {
 
     cv_bridge::CvImagePtr cv_ptr;
 
-    cv::Mat img(cv::Size(1280, 720), CV_8UC3);
+    cv::Mat img(cv::Size(1280,720), CV_8UC3);
+    cv::randu(img, cv::Scalar(0, 0, 0), cv::Scalar(255, 255, 255));
     cap >> img;
     sensor_msgs::msg::Image::SharedPtr msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", img).toImageMsg();
-    publisher_->publish(*msg);
+    publisher_->publish(*msg.get());
     RCLCPP_INFO(this->get_logger(), "publishing");
 }
   rclcpp::TimerBase::SharedPtr timer_;
