@@ -41,6 +41,9 @@ add_executable(usb_cam_sub src/usb_cam_sub.cpp)
 ament_target_dependencies(usb_cam_sub cv_bridge sensor_msgs std_msgs rclcpp image_transport)
 target_link_libraries(usb_cam_sub ${OpenCV_LIBS})
 
+add_executable(cam_pub src/cam_pub.cpp)
+ament_target_dependencies(cam_pub cv_bridge sensor_msgs std_msgs rclcpp image_transport)
+target_link_libraries(cam_pub ${OpenCV_LIBS})
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -55,6 +58,7 @@ install(TARGETS
   my_cpp_pkg_node
   usb_cam_pub
   usb_cam_sub
+  cam_pub
   DESTINATION lib/${PROJECT_NAME}
 )
 
