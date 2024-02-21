@@ -33,6 +33,8 @@ MinimalPublisher() : Node("minimal_publisher"), count_(0), cap(3){
     auto qos_profile = rclcpp::QoS(rclcpp::KeepLast(10));
     publisher_ = this->create_publisher<sensor_msgs::msg::Image>("topic", qos_profile);
     timer_ = this->create_wall_timer(10ms, std::bind(&MinimalPublisher::timer_callback, this));
+    cv::VideoCapture cap(3, cv::CAP_V4L);
+    
 }
 private:
 
