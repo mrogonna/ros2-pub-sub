@@ -28,27 +28,12 @@ class MinimalPublisher : public rclcpp::Node {
 
 public:
 
-MinimalPublisher() : Node("minimal_publisher"), count_(0) ,cap(0){
+MinimalPublisher() : Node("minimal_publisher"), count_(0), cap(3){
 
     auto qos_profile = rclcpp::QoS(rclcpp::KeepLast(10));
     publisher_ = this->create_publisher<sensor_msgs::msg::Image>("topic", qos_profile);
     timer_ = this->create_wall_timer(10ms, std::bind(&MinimalPublisher::timer_callback, this));
-     //Specify GStreamer pipeline
-    for (int i = 0; i < 10; ++i) {
-      cv::VideoCapture cap(i, cv::CAP_V4L);
-         if (cap.isOpened()) {
-          std::cout << "Camera found at index: " << i << std::endl;
-          cap.release();
-        }
-      }
-        // Check if the camera is opened successfully
-        if (!cap.isOpened()) {
-            RCLCPP_ERROR(this->get_logger(), "Failed to open camera");
-        } 
-
-
 }
-
 private:
 
 void timer_callback() {
