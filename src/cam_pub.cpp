@@ -26,22 +26,21 @@
 using namespace std::chrono_literals;
 using namespace cv;
 
-class MinimalPublisher : public rclcpp::Node {
+class MinimalImageCapture {
 public:
-    MinimalPublisher() : Node("minimal_publisher") {
-        publisher_ = this->create_publisher<sensor_msgs::msg::Image>("topic", 10);
-        timer_ = this->create_wall_timer(10ms, std::bind(&MinimalPublisher::publish_frame, this));
+    MinimalImageCapture() {
+        captureImage();
     }
 
 private:
-    void publish_frame() {
+    void captureImage() {
         constexpr int width = 1280;
         constexpr int height = 720;
         constexpr int channels = 3;
         cv::Mat frame;
 
         // Open a pipe to read frames from ffmpeg
-        FILE* pipe = popen("ffmpeg -f v4l2 -video_size 1280x7200 -i /dev/video3 -f image2pipe -pix_fmt rgb24 -vcodec rawvideo -", "r");
+        FILE* pipe = popen("ffmpeg -f v4l2 -video_size 1280x720 -i /dev/video3 -f image2pipe -pix_fmt rgb24 -vcodec rawvideo -", "r");
         if (!pipe) {
             std::cerr << "Error: Failed to open pipe." << std::endl;
             return;
@@ -58,23 +57,14 @@ private:
 
         pclose(pipe);
 
-        // Convert the frame to ROS Image message and publish
-        auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
-        publisher_->publish(*msg);
-        RCLCPP_INFO(this->get_logger(), "Published webcam frame");
+        // Save the frame as a PNG file
+        std::string filename = "captured_image.png";
+        cv::imwrite(filename, frame);
+        std::cout << "Saved image as " << filename << std::endl;
     }
-
-
-
-    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
-    rclcpp::TimerBase::SharedPtr timer_;
-    //cv::VideoCapture capture_{0}; // 0 for default webcam
 };
 
-int main(int argc, char *argv[]) {
-    rclcpp::init(argc, argv);
-    auto node = std::make_shared<MinimalPublisher>();
-    rclcpp::spin(node);
-    rclcpp::shutdown();
+int main() {
+    MinimalImageCapture image_capture;
     return 0;
 }
